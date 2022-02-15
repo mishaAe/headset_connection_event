@@ -4,7 +4,6 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 import android.view.KeyEvent;
 
 public class HeadsetBroadcastReceiver extends BroadcastReceiver {
@@ -35,9 +34,11 @@ public class HeadsetBroadcastReceiver extends BroadcastReceiver {
 
                 switch (connectionState) {
                     case BluetoothAdapter.STATE_CONNECTED:
+                        HeadsetConnectionEventPlugin.currentState = 1;
                         headsetEventListener.onHeadsetConnect();
                         break;
                     case BluetoothAdapter.STATE_DISCONNECTED:
+                        HeadsetConnectionEventPlugin.currentState = 0;
                         headsetEventListener.onHeadsetDisconnect();
                         break;
                 }
@@ -47,6 +48,7 @@ public class HeadsetBroadcastReceiver extends BroadcastReceiver {
                 final int connectionState = intent.getExtras().getInt(BluetoothAdapter.EXTRA_STATE);
 
                 if (connectionState == BluetoothAdapter.STATE_OFF) {
+                    HeadsetConnectionEventPlugin.currentState = 0;
                     headsetEventListener.onHeadsetDisconnect();
                 }
                 break;

@@ -1,8 +1,11 @@
 package flutter.moum.headset_connection_event;
 
 import android.bluetooth.BluetoothAdapter;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.AudioManager;
+import android.os.Build;
 
 import androidx.annotation.NonNull;
 
@@ -54,10 +57,20 @@ public class HeadsetConnectionEventPlugin implements FlutterPlugin, MethodCallHa
 
         final HeadsetBroadcastReceiver hReceiver = new HeadsetBroadcastReceiver(headsetEventListener);
         final IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_HEADSET_PLUG);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            filter.addAction(AudioManager.ACTION_HEADSET_PLUG);
+        } else {
+            filter.addAction(Intent.ACTION_HEADSET_PLUG);
+        }
         filter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
         filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
         flutterPluginBinding.getApplicationContext().registerReceiver(hReceiver, filter);
+
+        // check current state of bluetooth headset
+        AudioManager audioManager = (AudioManager) flutterPluginBinding.getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
+        boolean check = audioManager.isBluetoothScoAvailableOffCall();
+        boolean hasConnection = audioManager.isBluetoothA2dpOn();
+        currentState = check && hasConnection ? 1 : 0;
     }
 
     @Override
